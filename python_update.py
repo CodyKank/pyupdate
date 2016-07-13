@@ -17,6 +17,7 @@ def main():
     else:
         no_update(yn)
     #Here I plan to add some sys info formatted nice and pretty(free -h etc)
+    show_sys_info(yn)
     sys.exit()
 #^----------------------------------------------------------------------------- main()
     
@@ -60,6 +61,19 @@ def no_update(yn):
         print("Something other than 'Y' or 'N' was entered, skipping the update.")
     return
 #^----------------------------------------------------------------------------- not_update(yn)
+
+def show_sys_info(yn):
+    """Showing some info, plan to add more"""
+    if yn == 'Y' or yn =="y":
+        print('Update complete. . .')
+        
+    print("-----------------------------------------------------------------------------------")
+    mem_free_proc = subprocess.getoutput("grep MemFree /proc/meminfo")
+    temp = mem_free_proc.split()
+    free_mem = temp[1]
+    #Now using len etc need to make it human readable!
+    
+    
 
 #Standard broiler plate to run as main    
 if __name__ == '__main__':
