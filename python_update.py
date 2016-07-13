@@ -10,26 +10,27 @@ def main():
     distro = subprocess.getoutput("lsb_release -sd")
     user = subprocess.getoutput("whoami")
     print("Welcome {0}, you are currently running {1}".format((user), (distro)))
-    last_update = get_last_update()
+    last_update = get_last_update(user)
     yn = input("The last update was {0}, would you like to update now? [y/n]: ".format(last_update))
     if yn == 'Y' or yn == 'y':
-        update()
+        update(user)
     else:
         no_update(yn)
     #Here I plan to add some sys info formatted nice and pretty(free -h etc)
     sys.exit()
 #^----------------------------------------------------------------------------- main()
     
-def get_last_update():
+def get_last_update(user_name):
     """Method to obtain previous update, path is specified as update_file"""
-    update_file = "/home/cody/.mystuff/last_update.txt"
+    update_file = ("/home/" + user_name + "/.mystuff/last_update.txt")
     file_ob = open(update_file, 'r')
     last_update = file_ob.readline()
     file_ob.close()
     return last_update.rstrip()
 #^----------------------------------------------------------------------------- get_last_update()
 
-def update():
+def update(user_name):
+    """Updating the system, this is where it is debian-based/apt-get specific, could possibly change"""
     print("Proceeding to update system. . .")
     apt_update = subprocess.Popen(['sudo', 'apt-get', 'update'])
     apt_update.communicate() #making the script wait
@@ -38,12 +39,13 @@ def update():
     apt_upgrade.wait()
     apt_remove = subprocess.Popen(['sudo', 'apt-get', 'autoremove'])
     apt_remove.wait()
-    save_update()
+    save_update(user_name)
     return
 #^----------------------------------------------------------------------------- update()
 
-def save_update():
-    update_file = "/home/cody/.mystuff/last_update.txt"
+def save_update(user_name):
+    """If Y is chosen for update, the time and date will be saved to a file, able to be viewed again"""
+    update_file = ("/home/" + user_name + "/.mystuff/last_update.txt")
     file_ob = open(update_file, 'w')
     date = subprocess.getoutput('date')
     file_ob.write(str(date))
