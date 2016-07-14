@@ -1,12 +1,19 @@
 #!/usr/bin/env python3
-#Python 3 Linux System Update Script
-#Cody Kankel
-#Started Jul 11, 2016
+
+"""//////////////////////////////////////////////\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\"""
+//Python 3 Linux System Update Script
+//Cody Kankel
+||Started Jul 11, 2016
+||Last update: July 14, 2016
+\\Currently only supports debian/ubuntu distros with apt-get, I plan on adding support for yum
+\\and pacman package managers. Still need to allow creation of the folder and file for update!
+\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\///////////////////////////////////////////////"""
+
 
 import subprocess, sys
 
 def main():
-    """Script to update the system of Linux platforms using Python 3, plan on adding sys-info as well."""
+    """Script to update the system of Linux platforms using Python 3, shows sys-info as well."""
     distro = subprocess.getoutput("lsb_release -sd")
     user = subprocess.getoutput("whoami")
     print("Welcome {0}, you are currently running {1}".format((user), (distro)))
@@ -60,20 +67,53 @@ def no_update(yn):
     else:
         print("Something other than 'Y' or 'N' was entered, skipping the update.")
     return
-#^----------------------------------------------------------------------------- not_update(yn)
+#^----------------------------------------------------------------------------- no_update(yn)
 
 def show_sys_info(yn):
     """Showing some info, plan to add more"""
     if yn == 'Y' or yn =="y":
         print('Update complete. . .')
         
-    print("-----------------------------------------------------------------------------------")
-    mem_free_proc = subprocess.getoutput("grep MemFree /proc/meminfo")
+    print("_".center(80, '_')) #Filling screen with line
+    print("Printing System Info".center(80,'.')+ '\n')    
+    cpu_proc = subprocess.getoutput("lscpu | grep 'Model name:'")
+    cpu_name = " ".join((cpu_proc.split()[2:]))
+    cores_proc = subprocess.getoutput("lscpu | grep 'CPU(s):'")
+    cores = cores_proc.split()[1]
+    arch = subprocess.getoutput("uname -i")
+
+    
+    mem_free_proc = subprocess.getoutput("free -h")
     temp = mem_free_proc.split()
-    free_mem = temp[1]
-    #Now using len etc need to make it human readable!
+    total_mem = temp[7]
+    used_mem = temp[8]
+    free_mem = temp[9]
+    cached_mem = temp[11]
     
+    print_info("CPU:", cpu_name)
+    print_info("NUM CORES:", cores)
+    print_info("ARCHITECTURE:", arch)
+    print_seperator()
     
+    print_info("TOTAL MEMORY:", total_mem)
+    print_info("USED MEMORY:", used_mem)
+    print_info("CACHED MEMORY:", cached_mem)
+    print_info("FREE MEMORY:", free_mem)
+    print_seperator()
+    return
+#^----------------------------------------------------------------------------- show_sys_info(yn)
+    
+def print_info(str_name, result):
+    """Prints the information given as the str_name to be the designator and result being what
+    the designator will be. (free mem = str_name, 4K = result)"""
+    str_size = 40
+    print(str_name.ljust(str_size) + str(result).ljust(str_size))
+#^----------------------------------------------------------------------------- print_info(str_name, result)
+
+def print_seperator():
+    """Simply prints a separator on screen with periods...."""
+    print(".".center(80, '.'))
+#^----------------------------------------------------------------------------- print_separator()    
 
 #Standard broiler plate to run as main    
 if __name__ == '__main__':
