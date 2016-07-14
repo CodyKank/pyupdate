@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 
 """//////////////////////////////////////////////\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\"""
-//Python 3 Linux System Update Script
-//Cody Kankel
-||Started Jul 11, 2016
-||Last update: July 14, 2016
-\\Currently only supports debian/ubuntu distros with apt-get, I plan on adding support for yum
-\\and pacman package managers. Still need to allow creation of the folder and file for update!
-\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\///////////////////////////////////////////////"""
+  //                           Python 3 Linux System Update Script                              \\
+ //                                         Cody Kankel                                          \\  
+||                                      Started Jul 11, 2016                                      ||
+||                                    Last update: July 14, 2016                                  ||
+\\Currently only supports debian/ubuntu distros with apt-get, I plan on adding support for yum   //
+ \\and pacman package managers. Still need to allow creation of the folder and file for update! //
+  \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\///////////////////////////////////////////////"""
 
 
 import subprocess, sys
@@ -30,10 +30,13 @@ def main():
     
 def get_last_update(user_name):
     """Method to obtain previous update, path is specified as update_file"""
-    update_file = ("/home/" + user_name + "/.mystuff/last_update.txt")
-    file_ob = open(update_file, 'r')
-    last_update = file_ob.readline()
-    file_ob.close()
+    update_file = ("/home/" + user_name + "/.previous-update.txt")
+    try:
+        file_ob = open(update_file, 'r')
+        last_update = file_ob.readline()
+        file_ob.close()
+    except FileNotFoundError:
+        last_update = "This is the first update!"
     return last_update.rstrip()
 #^----------------------------------------------------------------------------- get_last_update()
 
@@ -53,7 +56,7 @@ def update(user_name):
 
 def save_update(user_name):
     """If Y is chosen for update, the time and date will be saved to a file, able to be viewed again"""
-    update_file = ("/home/" + user_name + "/.mystuff/last_update.txt")
+    update_file = ("/home/" + user_name + "/.previous-update.txt")
     file_ob = open(update_file, 'w')
     date = subprocess.getoutput('date')
     file_ob.write(str(date))
@@ -95,13 +98,30 @@ def show_sys_info(yn):
     print_info("ARCHITECTURE:", arch)
     print_seperator()
     
+    print("MEMORY USAGE:".center(80))
     print_info("TOTAL MEMORY:", total_mem)
     print_info("USED MEMORY:", used_mem)
     print_info("CACHED MEMORY:", cached_mem)
     print_info("FREE MEMORY:", free_mem)
     print_seperator()
+    
+    show_gui_info()
     return
 #^----------------------------------------------------------------------------- show_sys_info(yn)
+
+def show_gui_info():
+    """Will find and print desktop info"""
+    desktop_environment = subprocess.getoutput("echo $XDG_CURRENT_DESKTOP")
+    option = subprocess.getoutput("echo $GDMSESSION")
+    distro = subprocess.getoutput("lsb_release -sd")
+    
+    print("DESKTOP INFO:".center(80))
+    print_info("DISTROBUTION:", distro)
+    print_info("SESSION:", option)
+    print_info("DESKTOP ENVIRONMENT:", desktop_environment)
+    print_seperator()
+    return
+#^----------------------------------------------------------------------------- show_gui_info()
     
 def print_info(str_name, result):
     """Prints the information given as the str_name to be the designator and result being what
