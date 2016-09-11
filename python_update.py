@@ -1,35 +1,39 @@
 #!/usr/bin/env python3
 
-"""//////////////////////////////////////////////\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\"""
-  //                           Python 3 Linux System Update Script                              \\
+"""//////////////////////////////////////////////\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+  //                              Python 3 Linux System Update Script                           \\
  //                                         Cody Kankel                                          \\  
 ||                                      Started Jul 11, 2016                                      ||
-||                                    Last update: July 14, 2016                                  ||
-\\Currently only supports debian/ubuntu distros with apt-get, I plan on adding support for yum   //
- \\and pacman package managers. Still need to allow creation of the folder and file for update! //
+||                                 Last update: September 11th, 2016                              ||
+\\Currently only supports debian/ubuntu distros with apt-get, and Arch based distros with pacman.//
+ \\                            !RHEL based distros have not been tested yet!                    //
   \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\///////////////////////////////////////////////"""
-
 
 import subprocess, sys
 
 def main():
-    """Script to update the system of Linux platforms using Python 3, shows sys-info as well."""
-    distro = subprocess.getoutput("lsb_release -sd")
+    """Gathering user and desktop session, asks user for desire to update."""
+    #distro = subprocess.getoutput("lsb_release -sd")
+    session = subprocess.getoutput("env | grep 'DESKTOP_SESSION'").split('\n')[0]
+    # Getting the first string after the '=' which would in theory be the desktop session name i.e. gnome
+    session = session[session.find('=') +1:]
     user = subprocess.getoutput("whoami")
-    print("Welcome {0}, you are currently running {1}".format((user), (distro)))
+    print("Welcome {0}, you are currently running {1}".format((user), (session)))
     last_update = get_last_update(user)
-    yn = input("The last update was {0}, would you like to update now? [y/n]: ".format(last_update))
-    if yn == 'Y' or yn == 'y':
+    user_response = input("The last update was: {0}. \nWould you like to update now? [y/n]: ".format(last_update))
+    if user_response == 'Y' or user_response == 'y':
         update(user)
     else:
-        no_update(yn)
-    #Here I plan to add some sys info formatted nice and pretty(free -h etc)
-    show_sys_info(yn)
+        no_update(user_response)
+    show_sys_info(user_response)
     sys.exit()
 #^----------------------------------------------------------------------------- main()
     
 def get_last_update(user_name):
-    """Method to obtain previous update, path is specified as update_file"""
+    """Method to obtain previous update, path is specified as update_file.
+    If the file is not found, assuming this is the first time running the script.
+    The file will then be created if 'y' is chosen (executing the update)."""
+    # Update-file will contain the date/time of the last update. It is hidden hence the prefix '.'
     update_file = ("/home/" + user_name + "/.previous-update.txt")
     try:
         file_ob = open(update_file, 'r')
@@ -41,18 +45,50 @@ def get_last_update(user_name):
 #^----------------------------------------------------------------------------- get_last_update()
 
 def update(user_name):
-    """Updating the system, this is where it is debian-based/apt-get specific, could possibly change"""
+    """Method which actually updates the system. Checks if system is Arch, Debian, etc.
+    then properly updates the system. For Arch systems, performs full system upgrade."""
+    system = get_system_type()
+    print("System identified as, or based on: {0}".format(system))
     print("Proceeding to update system. . .")
-    apt_update = subprocess.Popen(['sudo', 'apt-get', 'update'])
-    apt_update.communicate() #making the script wait
-    apt_update.wait()
-    apt_upgrade = subprocess.Popen(['sudo', 'apt-get', 'dist-upgrade'])
-    apt_upgrade.wait()
-    apt_remove = subprocess.Popen(['sudo', 'apt-get', 'autoremove'])
-    apt_remove.wait()
-    save_update(user_name)
+    
+    if system == 'arch':
+        pacman = subprocess.Popen(['sudo', 'pacman', '-Syyu'])
+        pacman.wait()
+        save_update(user_name)
+    elif system == 'debian':
+        apt_update = subprocess.Popen(['sudo', 'apt-get', 'update'])
+        apt_update.communicate() #making the script wait
+        apt_update.wait()
+        apt_upgrade = subprocess.Popen(['sudo', 'apt-get', 'dist-upgrade'])
+        apt_upgrade.wait()
+        apt_remove = subprocess.Popen(['sudo', 'apt-get', 'autoremove'])
+        apt_remove.wait()
+        save_update(user_name)
+    elif system == 'rhel':
+        yum = subprocess.Popen(['su', '-c', 'yum', 'update'])
+        yum.wait()
+        save_update(user_name)
     return
 #^----------------------------------------------------------------------------- update()
+
+def get_system_type():
+    """Method to discover what distro the system is, i.e. if system is Debian, Red Hat, Arch
+    etc. Will look for the ID in /etc/os-release. This means it will discover Antergos, Manjaro
+    and others as Arch, and Xubuntu, Ubuntu, and others asd Debian, and Scientific, CentOs, Fedora
+    and others  as Red Hat. Method returns the base system as a string."""
+    
+    system_id = subprocess.getoutput("cat /etc/os-release | grep 'ID'")
+    system_id = system_id[system_id.find('"') + 1:]
+    system_id = system_id[:system_id.find('"')].split()[0] #taking the first result
+    
+    # switch statement wanna-be
+    distro_choices = {'fedora': 'rhel', 'centos': 'rhel', 'scientific': 'rhel', 'rhel': 'rhel', \
+                      'debian': 'debian', 'ubuntu': 'debian', 'xubuntu': 'debian', 'arch': 'arch', \
+                      'antergos': 'arch', 'majaro': 'arch'}
+    default = 'Unknown'
+    system = distro_choices.get(system_id, default)
+    return system
+#^----------------------------------------------------------------------------- find_system_type()
 
 def save_update(user_name):
     """If Y is chosen for update, the time and date will be saved to a file, able to be viewed again"""
@@ -73,7 +109,8 @@ def no_update(yn):
 #^----------------------------------------------------------------------------- no_update(yn)
 
 def show_sys_info(yn):
-    """Showing some info, plan to add more"""
+    """Showing some info, plan to add more. Currently shows:
+    Number of Cores, CPU"""
     if yn == 'Y' or yn =="y":
         print('Update complete. . .')
         
@@ -83,7 +120,7 @@ def show_sys_info(yn):
     cpu_name = " ".join((cpu_proc.split()[2:]))
     cores_proc = subprocess.getoutput("lscpu | grep 'CPU(s):'")
     cores = cores_proc.split()[1]
-    arch = subprocess.getoutput("uname -i")
+    arch = subprocess.getoutput("uname -m")
 
     
     mem_free_proc = subprocess.getoutput("free -h")
@@ -113,10 +150,11 @@ def show_gui_info():
     """Will find and print desktop info"""
     desktop_environment = subprocess.getoutput("echo $XDG_CURRENT_DESKTOP")
     option = subprocess.getoutput("echo $GDMSESSION")
-    distro = subprocess.getoutput("lsb_release -sd")
+    distro = subprocess.getoutput("cat /etc/os-release | grep 'PRETTY'")
+    distro = distro.split('=')[1].replace('"', '') # Grabbing just the pretty-name
     
     print("DESKTOP INFO:".center(80))
-    print_info("DISTROBUTION:", distro)
+    print_info("DISTRIBUTION:", distro)
     print_info("SESSION:", option)
     print_info("DESKTOP ENVIRONMENT:", desktop_environment)
     print_seperator()
@@ -128,11 +166,13 @@ def print_info(str_name, result):
     the designator will be. (free mem = str_name, 4K = result)"""
     str_size = 40
     print(str_name.ljust(str_size) + str(result).ljust(str_size))
+    return
 #^----------------------------------------------------------------------------- print_info(str_name, result)
 
 def print_seperator():
-    """Simply prints a separator on screen with periods...."""
+    """Simply prints a separator on screen with periods. 80 chars long."""
     print(".".center(80, '.'))
+    return
 #^----------------------------------------------------------------------------- print_separator()    
 
 #Standard broiler plate to run as main    
