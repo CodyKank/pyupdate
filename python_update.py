@@ -77,9 +77,9 @@ def get_system_type():
     and others as Arch, and Xubuntu, Ubuntu, and others asd Debian, and Scientific, CentOs, Fedora
     and others  as Red Hat. Method returns the base system as a string."""
     
-    system_id = subprocess.getoutput("cat /etc/os-release | grep 'ID'")
-    system_id = system_id[system_id.find('"') + 1:]
-    system_id = system_id[:system_id.find('"')].split()[0] #taking the first result
+    system_id = subprocess.getoutput("cat /etc/os-release | grep 'ID'").split()[0]
+    system_id.replace('"', '') # Some systems produce (")'s  others do not!
+    system_id = system_id[system_id.find('=') + 1:]
     
     # switch statement wanna-be
     distro_choices = {'fedora': 'rhel', 'centos': 'rhel', 'scientific': 'rhel', 'rhel': 'rhel', \
