@@ -48,45 +48,58 @@ def update(user_name):
     """Method which actually updates the system. Checks if system is Arch, Debian, etc.
     then properly updates the system. For Arch systems, performs full system upgrade."""
     system = get_system_type()
-    print("System identified as, or based on: {0}".format(system))
-    print("Proceeding to update system. . .")
     
-    if system == 'arch':
-        pacman = subprocess.Popen(['sudo', 'pacman', '-Syyu'])
-        pacman.wait()
-        save_update(user_name)
-    elif system == 'debian':
-        apt_update = subprocess.Popen(['sudo', 'apt-get', 'update'])
-        apt_update.communicate() #making the script wait
-        apt_update.wait()
-        apt_upgrade = subprocess.Popen(['sudo', 'apt-get', 'dist-upgrade'])
-        apt_upgrade.wait()
-        apt_remove = subprocess.Popen(['sudo', 'apt-get', 'autoremove'])
-        apt_remove.wait()
-        save_update(user_name)
-    elif system == 'rhel':
-        yum = subprocess.Popen(['su', '-c', 'yum', 'update'])
-        yum.wait()
-        save_update(user_name)
+    if system != 'Unknown':
+
+        print("System identified as, or based on: {0}".format(system))
+        print("Proceeding to update system. . .")
+    
+        if system == 'arch':
+            pacman = subprocess.Popen(['sudo', 'pacman', '-Syyu'])
+            pacman.wait()
+            save_update(user_name)
+            print("\nUpdate complete. . .\n")
+        elif system == 'debian':
+            apt_update = subprocess.Popen(['sudo', 'apt-get', 'update'])
+            apt_update.communicate() #making the script wait
+            apt_update.wait()
+            apt_upgrade = subprocess.Popen(['sudo', 'apt-get', 'dist-upgrade'])
+            apt_upgrade.wait()
+            apt_remove = subprocess.Popen(['sudo', 'apt-get', 'autoremove'])
+            apt_remove.wait()
+            save_update(user_name)
+            print("Update complete. . .")
+        elif system == 'rhel':
+            yum = subprocess.Popen(['su', '-c', 'yum', 'update'])
+            yum.wait()
+            save_update(user_name)
+            print("Update complete. . .")
+    else:
+        print("\nSystem is not recognized currently. If you feel as if this is an error,\n"\
+                + "please report it on Github.\n")
     return
 #^----------------------------------------------------------------------------- update()
 
 def get_system_type():
     """Method to discover what distro the system is, i.e. if system is Debian, Red Hat, Arch
     etc. Will look for the ID in /etc/os-release. This means it will discover Antergos, Manjaro
-    and others as Arch, and Xubuntu, Ubuntu, and others asd Debian, and Scientific, CentOs, Fedora
+    and others as Arch, and Xubuntu, Ubuntu, and others as Debian, and Scientific, CentOs, Fedora
     and others  as Red Hat. Method returns the base system as a string."""
     
-    system_id = subprocess.getoutput("cat /etc/os-release | grep 'ID'").split()[0]
-    system_id.replace('"', '') # Some systems produce (")'s  others do not!
+    system_id = (subprocess.getoutput("cat /etc/os-release | grep 'ID='")).split('\n')[0]
+    system_id = system_id.replace('"','') # Some systems produce (")'s  others do not!
     system_id = system_id[system_id.find('=') + 1:]
     
     # switch statement wanna-be
     distro_choices = {'fedora': 'rhel', 'centos': 'rhel', 'scientific': 'rhel', 'rhel': 'rhel', \
                       'debian': 'debian', 'ubuntu': 'debian', 'xubuntu': 'debian', 'arch': 'arch', \
-                      'antergos': 'arch', 'majaro': 'arch'}
+                      'antergos': 'arch', 'manjaro': 'arch'}
     default = 'Unknown'
     system = distro_choices.get(system_id, default)
+    if system == default:
+        system_id = subprocess.getoutput("cat /etc/os-release | grep'ID_LIKE=").split('\n')[0]
+        system_id = system_id.replace('"', '')
+        
     return system
 #^----------------------------------------------------------------------------- find_system_type()
 
@@ -102,17 +115,15 @@ def save_update(user_name):
 
 def no_update(yn):
     if yn == 'N' or yn == 'n':
-        print("We won't update right now.")
+        print("\nAn update will not be applied at this time. . .\n")
     else:
-        print("Something other than 'Y' or 'N' was entered, skipping the update.")
+        print("\n|Error:| Something other than 'Y' or 'N' was entered, skipping the update.")
     return
 #^----------------------------------------------------------------------------- no_update(yn)
 
 def show_sys_info(yn):
     """Showing some info, plan to add more. Currently shows:
     Number of Cores, CPU"""
-    if yn == 'Y' or yn =="y":
-        print('Update complete. . .')
         
     print("_".center(80, '_')) #Filling screen with line
     print("Printing System Info".center(80,'.')+ '\n')    
