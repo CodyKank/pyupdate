@@ -4,7 +4,7 @@
   //                              Python 3 Linux System Update Script                           \\
  //                                         Cody Kankel                                          \\  
 ||                                      Started Jul 11, 2016                                      ||
-||                                 Last update: September 11th, 2016                              ||
+||                                 Last update: September 14th, 2016                              ||
 \\Currently only supports debian/ubuntu distros with apt-get, and Arch based distros with pacman.//
  \\                            !RHEL based distros have not been tested yet!                    //
   \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\///////////////////////////////////////////////"""
@@ -92,8 +92,8 @@ def get_system_type():
     
     # switch statement wanna-be
     distro_choices = {'fedora': 'rhel', 'centos': 'rhel', 'scientific': 'rhel', 'rhel': 'rhel', \
-                      'debian': 'debian', 'ubuntu': 'debian', 'xubuntu': 'debian', 'arch': 'arch', \
-                      'antergos': 'arch', 'manjaro': 'arch'}
+                      'debian': 'debian', 'ubuntu': 'debian', 'xubuntu': 'debian', 'galliumos': 'debian', \
+                      'arch': 'arch', 'antergos': 'arch', 'manjaro': 'arch'}
     default = 'Unknown'
     system = distro_choices.get(system_id, default)
     if system == default:
