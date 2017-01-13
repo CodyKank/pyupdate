@@ -2,9 +2,9 @@
 
 """//////////////////////////////////////////////\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
   //                              Python 3 Linux System Update Script                           \\
- //                                         Cody Kankel                                          \\  
+ //                                         Cody Kankel                                          \\
 ||                                      Started Jul 11, 2016                                      ||
-||                                 Last update: September 14th, 2016                              ||
+||                                 Last update: Jan 12th, 2016                                    ||
 \\Currently only supports debian/ubuntu distros with apt-get, and Arch based distros with pacman.//
  \\                            !RHEL based distros have not been tested yet!                    //
   \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\///////////////////////////////////////////////"""
@@ -28,7 +28,7 @@ def main():
     show_sys_info(user_response)
     sys.exit()
 #^----------------------------------------------------------------------------- main()
-    
+
 def get_last_update(user_name):
     """Method to obtain previous update, path is specified as update_file.
     If the file is not found, assuming this is the first time running the script.
@@ -48,30 +48,35 @@ def update(user_name):
     """Method which actually updates the system. Checks if system is Arch, Debian, etc.
     then properly updates the system. For Arch systems, performs full system upgrade."""
     system = get_system_type()
-    
+
     if system != 'Unknown':
 
         print("System identified as, or based on: {0}".format(system))
         print("Proceeding to update system. . .")
-    
+
         if system == 'arch':
             pacman = subprocess.Popen(['sudo', 'pacman', '-Syyu'])
             pacman.wait()
             save_update(user_name)
             print("\nUpdate complete. . .\n")
         elif system == 'debian':
-            apt_update = subprocess.Popen(['sudo', 'apt-get', 'update'])
+            apt_update = subprocess.Popen(['sudo', 'apt-get', '-y', 'update'])
             apt_update.communicate() #making the script wait
             apt_update.wait()
-            apt_upgrade = subprocess.Popen(['sudo', 'apt-get', 'dist-upgrade'])
+            apt_upgrade = subprocess.Popen(['sudo', 'apt-get', '-y', 'dist-upgrade'])
             apt_upgrade.wait()
-            apt_remove = subprocess.Popen(['sudo', 'apt-get', 'autoremove'])
+            apt_remove = subprocess.Popen(['sudo', 'apt-get', '-y', 'autoremove'])
             apt_remove.wait()
             save_update(user_name)
             print("Update complete. . .")
         elif system == 'rhel':
-            yum = subprocess.Popen(['su', '-c', 'yum', 'update'])
+            yum = subprocess.Popen(['su', '-c', 'yum', '-y', 'update'])
             yum.wait()
+            save_update(user_name)
+            print("Update complete. . .")
+        elif system == 'solus':
+            update = subprocess.Popen((['sudo', '-S', 'eopkg', '-y', 'up']))
+            update.wait()
             save_update(user_name)
             print("Update complete. . .")
     else:
@@ -85,21 +90,22 @@ def get_system_type():
     etc. Will look for the ID in /etc/os-release. This means it will discover Antergos, Manjaro
     and others as Arch, and Xubuntu, Ubuntu, and others as Debian, and Scientific, CentOs, Fedora
     and others  as Red Hat. Method returns the base system as a string."""
-    
+
     system_id = (subprocess.getoutput("cat /etc/os-release | grep 'ID='")).split('\n')[0]
     system_id = system_id.replace('"','') # Some systems produce (")'s  others do not!
     system_id = system_id[system_id.find('=') + 1:]
-    
+
     # switch statement wanna-be
     distro_choices = {'fedora': 'rhel', 'centos': 'rhel', 'scientific': 'rhel', 'rhel': 'rhel', \
                       'debian': 'debian', 'ubuntu': 'debian', 'xubuntu': 'debian', 'galliumos': 'debian', \
-                      'arch': 'arch', 'antergos': 'arch', 'manjaro': 'arch'}
+                      'elementary': 'debian', 'arch': 'arch', 'antergos': 'arch', 'manjaro': 'arch', \
+                      'solus': 'solus'}
     default = 'Unknown'
     system = distro_choices.get(system_id, default)
     if system == default:
         system_id = subprocess.getoutput("cat /etc/os-release | grep'ID_LIKE=").split('\n')[0]
         system_id = system_id.replace('"', '')
-        
+
     return system
 #^----------------------------------------------------------------------------- find_system_type()
 
@@ -124,35 +130,35 @@ def no_update(yn):
 def show_sys_info(yn):
     """Showing some info, plan to add more. Currently shows:
     Number of Cores, CPU"""
-        
+
     print("_".center(80, '_')) #Filling screen with line
-    print("Printing System Info".center(80,'.')+ '\n')    
+    print("Printing System Info".center(80,'.')+ '\n')
     cpu_proc = subprocess.getoutput("lscpu | grep 'Model name:'")
     cpu_name = " ".join((cpu_proc.split()[2:]))
     cores_proc = subprocess.getoutput("lscpu | grep 'CPU(s):'")
     cores = cores_proc.split()[1]
     arch = subprocess.getoutput("uname -m")
 
-    
+
     mem_free_proc = subprocess.getoutput("free -h")
     temp = mem_free_proc.split()
     total_mem = temp[7]
     used_mem = temp[8]
     free_mem = temp[9]
     cached_mem = temp[11]
-    
+
     print_info("CPU:", cpu_name)
     print_info("NUM CORES:", cores)
     print_info("ARCHITECTURE:", arch)
     print_seperator()
-    
+
     print("MEMORY USAGE:".center(80))
     print_info("TOTAL MEMORY:", total_mem)
     print_info("USED MEMORY:", used_mem)
     print_info("CACHED MEMORY:", cached_mem)
     print_info("FREE MEMORY:", free_mem)
     print_seperator()
-    
+
     show_gui_info()
     return
 #^----------------------------------------------------------------------------- show_sys_info(yn)
@@ -163,7 +169,7 @@ def show_gui_info():
     option = subprocess.getoutput("echo $GDMSESSION")
     distro = subprocess.getoutput("cat /etc/os-release | grep 'PRETTY'")
     distro = distro.split('=')[1].replace('"', '') # Grabbing just the pretty-name
-    
+
     print("DESKTOP INFO:".center(80))
     print_info("DISTRIBUTION:", distro)
     print_info("SESSION:", option)
@@ -171,7 +177,7 @@ def show_gui_info():
     print_seperator()
     return
 #^----------------------------------------------------------------------------- show_gui_info()
-    
+
 def print_info(str_name, result):
     """Prints the information given as the str_name to be the designator and result being what
     the designator will be. (free mem = str_name, 4K = result)"""
@@ -184,8 +190,8 @@ def print_seperator():
     """Simply prints a separator on screen with periods. 80 chars long."""
     print(".".center(80, '.'))
     return
-#^----------------------------------------------------------------------------- print_separator()    
+#^----------------------------------------------------------------------------- print_separator()
 
-#Standard broiler plate to run as main    
+#Standard broiler plate to run as main
 if __name__ == '__main__':
     main()

@@ -1,12 +1,36 @@
 #Pyupdate
-**Pyupdate** is a small project created to learn the subprocess module and practice using python 3.
-The script will probe your system to find the distribution, desktop environment, CPU, and memory
-usage. If I think of anything else useful I may end up adding that as well (disk usage?). Cuurently
-the script is targeted at the popular distros and their updating schemes. So, the supported distros
-are: Arch, Debian, RHEL. This also includes distros based on those, as long as they are using the
-default package manger their parent distro uses (pacman, yum, and dpkg/apt-get). 
-* The sys-info isn't all too appealing right now. I'm hoping I change that.
+**Pyupdate** is a small project to ease the troubles of keeping a system up to date.
+The script attempts to make it easy to update a good portion of Linux distributions.
+Python 3 is the future of Python, and it is installed on most bleeding edge style
+distros and so it was the choice for this project. It will record the last update
+if the update was applied through Pyupdate, and display it before updating again.
+It works on the principle of inheritance, that most distributions are based on another.
+Look at Debian for example, there are hundreds of different distros based off Debian alone.
+Thus, this script will search in itself for the detected distribution and find what it is
+based off of and use that package manager to update the system. The supported distros are as
+follows:
 
-* Must be using Arch, Debian, or RHEL (and their children distros) for this to work. See above.
+####Supported Derived distributions
+| Distro          | Derived From     |
+| --------------- | ---------------- |
+| Ubuntu          | Debian           |
+| Xubuntu         | Debian           |
+| GalliumOs       | Debian           |
+| Elementary      | Debian           |
+| Antergos        | Arch             |
+| Manjaro         | Arch             |
+| Fedora          | RHEL             |
+| CentOs          | RHEL             |
+| Scientific      | RHEL             |
 
-* Must have python 3 installed, with the subprocess module (should be there by default).
+####Supported Independent/Parent distributions
+| Distro          | Supported        |
+| --------------- | ---------------- |
+| RHEL            | Yes              |
+| Arch            | Yes              |
+| Debian          | Yes              |
+| Solus           | Yes              |
+
+####Requirements
+* Must have Python 3 installed
+* Must have one of the above distributions of Linux.
