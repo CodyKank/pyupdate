@@ -4,21 +4,20 @@
   //                              Python 3 Linux System Update Script                           \\
  //                                         Cody Kankel                                          \\
 ||                                      Started Jul 11, 2016                                      ||
-||                                 Last update: Jan 12th, 2016                                    ||
+||                                 Last update: Mar 7th, 2017                                     ||
 \\Currently only supports debian/ubuntu distros with apt-get, and Arch based distros with pacman.//
- \\                            !RHEL based distros have not been tested yet!                    //
+ \\                            Also supports the independent distro Solus                       //
   \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\///////////////////////////////////////////////"""
 
 import subprocess, sys
 
 def main():
     """Gathering user and desktop session, asks user for desire to update."""
-    #distro = subprocess.getoutput("lsb_release -sd")
-    session = subprocess.getoutput("env | grep 'DESKTOP_SESSION'").split('\n')[0]
-    # Getting the first string after the '=' which would in theory be the desktop session name i.e. gnome
-    session = session[session.find('=') +1:]
+    if len(sys.argv) > 1:
+        if sys.argv[1] == "-s":
+            show_sys_info("n")
     user = subprocess.getoutput("whoami")
-    print("Welcome {0}, you are currently running {1}".format((user), (session)))
+    print("Welcome {0}".format(user))
     last_update = get_last_update(user)
     user_response = input("The last update was: {0}. \nWould you like to update now? [y/n]: ".format(last_update))
     if user_response == 'Y' or user_response == 'y':
@@ -131,13 +130,14 @@ def show_sys_info(yn):
     """Showing some info, plan to add more. Currently shows:
     Number of Cores, CPU"""
 
-    print("_".center(80, '_')) #Filling screen with line
-    print("Printing System Info".center(80,'.')+ '\n')
     cpu_proc = subprocess.getoutput("lscpu | grep 'Model name:'")
     cpu_name = " ".join((cpu_proc.split()[2:]))
     cores_proc = subprocess.getoutput("lscpu | grep 'CPU(s):'")
     cores = cores_proc.split()[1]
     arch = subprocess.getoutput("uname -m")
+    kernel = subprocess.getoutput("uname -r")
+    hostname = subprocess.getoutput("uname -n")
+    kernelType = subprocess.getoutput("uname -s")
 
 
     mem_free_proc = subprocess.getoutput("free -h")
@@ -147,9 +147,18 @@ def show_sys_info(yn):
     free_mem = temp[9]
     cached_mem = temp[11]
 
+    
+    print_seperator()
+    print(("INFO FOR {0}".format(hostname)).center(80," "))
+    print_seperator()
+
+    print("SYS INFO:".center(80))
     print_info("CPU:", cpu_name)
     print_info("NUM CORES:", cores)
     print_info("ARCHITECTURE:", arch)
+    print_info("KERNEL TYPE:", kernelType)
+    print_info("KERNEL:", kernel)
+    #print("") # a simple line
     print_seperator()
 
     print("MEMORY USAGE:".center(80))
@@ -160,7 +169,7 @@ def show_sys_info(yn):
     print_seperator()
 
     show_gui_info()
-    return
+    sys.exit()
 #^----------------------------------------------------------------------------- show_sys_info(yn)
 
 def show_gui_info():
