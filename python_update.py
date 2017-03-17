@@ -4,7 +4,7 @@
   //                              Python 3 Linux System Update Script                           \\
  //                                         Cody Kankel                                          \\
 ||                                      Started Jul 11, 2016                                      ||
-||                                 Last update: Mar 7th, 2017                                     ||
+||                                 Last update: Mar 17th, 2017                                    ||
 \\Currently only supports debian/ubuntu distros with apt-get, and Arch based distros with pacman.//
  \\                            Also supports the independent distro Solus                       //
   \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\///////////////////////////////////////////////"""
@@ -178,6 +178,10 @@ def show_gui_info():
     option = subprocess.getoutput("echo $GDMSESSION")
     distro = subprocess.getoutput("cat /etc/os-release | grep 'PRETTY'")
     distro = distro.split('=')[1].replace('"', '') # Grabbing just the pretty-name
+    if desktop_environment == "":
+        desktop_environment = "Headless"
+    if option == "":
+        option = "A shell"
 
     print("DESKTOP INFO:".center(80))
     print_info("DISTRIBUTION:", distro)
