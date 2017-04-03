@@ -1,4 +1,4 @@
-#Pyupdate
+# Pyupdate
 **Pyupdate** is a small project to ease the troubles of keeping a system up to date.
 The script attempts to make it easy to update a good portion of Linux distributions.
 Python 3 is the future of Python, and it is installed on most bleeding edge style
@@ -10,7 +10,7 @@ Thus, this script will search in itself for the detected distribution and find w
 based off of and use that package manager to update the system. The supported distros are as
 follows:
 
-####Supported Derived distributions
+#### Supported Derived distributions
 | Distro          | Derived From     |
 | --------------- | ---------------- |
 | Ubuntu          | Debian           |
@@ -23,7 +23,7 @@ follows:
 | CentOs          | RHEL             |
 | Scientific      | RHEL             |
 
-####Supported Independent/Parent distributions
+#### Supported Independent/Parent distributions
 | Distro          | Supported        |
 | --------------- | ---------------- |
 | RHEL            | Yes              |
@@ -31,6 +31,14 @@ follows:
 | Debian          | Yes              |
 | Solus           | Yes              |
 
-####Requirements
+#### Options
+* The script can be run with the optional argument of -s to skip the update
+** The result is only printing the system information.
+
+#### Requirements
 * Must have Python 3 installed
 * Must have one of the above distributions of Linux.
+
+#### Future Goals
+* Provide better information post-update
+* Option to show available updates
