@@ -19,9 +19,9 @@ follows:
 | Elementary      | Debian           |
 | Antergos        | Arch             |
 | Manjaro         | Arch             |
-| Fedora          | RHEL             |
 | CentOs          | RHEL             |
 | Scientific      | RHEL             |
+| Korora          | Fedora           |
 
 #### Supported Independent/Parent distributions
 | Distro          | Supported        |
@@ -30,6 +30,7 @@ follows:
 | Arch            | Yes              |
 | Debian          | Yes              |
 | Solus           | Yes              |
+| Fedora          | Yes              |
 
 #### Options
 * The script can be run with the optional argument of -s to skip the update

@@ -4,9 +4,9 @@
   //                              Python 3 Linux System Update Script                           \\
  //                                         Cody Kankel                                          \\
 ||                                      Started Jul 11, 2016                                      ||
-||                                 Last update: Mar 17th, 2017                                    ||
-\\Currently only supports debian/ubuntu distros with apt-get, and Arch based distros with pacman.//
- \\                            Also supports the independent distro Solus                       //
+||                                 Last update: May 3rd, 2017                                     ||
+\\         Currently supports Arch, Red-Hat, Fedora, and Solus and those based on them.          //
+ \\                                                                                             //
   \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\///////////////////////////////////////////////"""
 
 import subprocess, sys
@@ -78,6 +78,9 @@ def update(user_name):
             update.wait()
             save_update(user_name)
             print("Update complete. . .")
+        elif system == 'fedora':
+            subprocess.check_call(['su','-c', 'dnf upgrade'])
+            save_update(user_name)
     else:
         print("\nSystem is not recognized currently. If you feel as if this is an error,\n"\
                 + "please report it on Github.\n")
@@ -95,16 +98,16 @@ def get_system_type():
     system_id = system_id[system_id.find('=') + 1:]
 
     # switch statement wanna-be
-    distro_choices = {'fedora': 'rhel', 'centos': 'rhel', 'scientific': 'rhel', 'rhel': 'rhel', \
+    distro_choices = {'fedora': 'fedora', 'centos': 'rhel', 'scientific': 'rhel', 'rhel': 'rhel', \
                       'debian': 'debian', 'ubuntu': 'debian', 'xubuntu': 'debian', 'galliumos': 'debian', \
                       'elementary': 'debian', 'arch': 'arch', 'antergos': 'arch', 'manjaro': 'arch', \
                       'solus': 'solus'}
     default = 'Unknown'
     system = distro_choices.get(system_id, default)
+    print(system)
     if system == default:
-        system_id = subprocess.getoutput("cat /etc/os-release | grep'ID_LIKE=").split('\n')[0]
-        system_id = system_id.replace('"', '')
-
+        system_id = subprocess.getoutput("cat /etc/os-release | grep 'ID_LIKE='").split('=')[1]
+        system = system_id.replace('"', '')
     return system
 #^----------------------------------------------------------------------------- find_system_type()
 
