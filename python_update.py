@@ -48,42 +48,72 @@ def update(user_name):
     then properly updates the system. For Arch systems, performs full system upgrade."""
     system = get_system_type()
 
+    repeatVar = True
+
     if system != 'Unknown':
 
         print("System identified as, or based on: {0}".format(system))
         print("Proceeding to update system. . .")
 
         if system == 'arch':
-            pacman = subprocess.Popen(['sudo', 'pacman', '-Syyu'])
-            pacman.wait()
-            save_update(user_name)
+            while(repeatVar):
+                try:
+                    pacman = subprocess.Popen(['sudo', 'pacman', '-Syyu'])
+                    pacman.wait()
+                    save_update(user_name)
+                    repeatVar = False
+                except subprocess.CalledProcessError:
+                    print("Incorrect Password.")
+                    repeatVar = True
             print("\nUpdate complete. . .\n")
         elif system == 'debian':
-            apt_update = subprocess.Popen(['sudo', 'apt-get', '-y', 'update'])
-            apt_update.communicate() #making the script wait
-            apt_update.wait()
-            apt_upgrade = subprocess.Popen(['sudo', 'apt-get', '-y', 'dist-upgrade'])
-            apt_upgrade.wait()
-            apt_remove = subprocess.Popen(['sudo', 'apt-get', '-y', 'autoremove'])
-            apt_remove.wait()
-            save_update(user_name)
+            while(repeatVar):
+                try:
+                    apt_update = subprocess.Popen(['sudo', 'apt-get', '-y', 'update'])
+                    apt_update.communicate() #making the script wait
+                    apt_update.wait()
+                    apt_upgrade = subprocess.Popen(['sudo', 'apt-get', '-y', 'dist-upgrade'])
+                    apt_upgrade.wait()
+                    apt_remove = subprocess.Popen(['sudo', 'apt-get', '-y', 'autoremove'])
+                    apt_remove.wait()
+                    save_update(user_name)
+                    repeatVar = False
+                except subprocess.CalledProcessError:
+                    print("Incorrect Password.")
+                    repeatVar = True
             print("Update complete. . .")
         elif system == 'rhel':
-            yum = subprocess.Popen(['su', '-c', 'yum', '-y', 'update'])
-            yum.wait()
-            save_update(user_name)
+            while(repeatVar):
+                try:
+                    yum = subprocess.Popen(['su', '-c', 'yum', '-y', 'update'])
+                    yum.wait()
+                    save_update(user_name)
+                except subprocess.CalledProcessError:
+                    print("Incorrect Password.")
+                    repeatVar = True
             print("Update complete. . .")
         elif system == 'solus':
-            update = subprocess.Popen((['sudo', '-S', 'eopkg', '-y', 'up']))
-            update.wait()
-            save_update(user_name)
+            while(repeatVar):
+                try:
+                    update = subprocess.Popen((['sudo', '-S', 'eopkg', '-y', 'up']))
+                    update.wait()
+                    save_update(user_name)
+                except subprocess.CalledProcessError:
+                    print("Incorrect Password.")
+                    repeatVar = True
             print("Update complete. . .")
         elif system == 'fedora':
-            subprocess.check_call(['su','-c', 'dnf upgrade'])
-            save_update(user_name)
+            while(repeatVar):
+                try:
+                    subprocess.check_call(['su','-c', 'dnf upgrade'])
+                    save_update(user_name)
+                    repeatVar = False
+                except subprocess.CalledProcessError:
+                    print("Incorrect Password.")
+                    repeatVar = True
     else:
         print("\nSystem is not recognized currently. If you feel as if this is an error,\n"\
-                + "please report it on Github.\n")
+                + "please report it as an issue on Github.\n")
     return
 #^----------------------------------------------------------------------------- update()
 
