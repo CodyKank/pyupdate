@@ -4,7 +4,7 @@
   //                              Python 3 Linux System Update Script                           \\
  //                                         Cody Kankel                                          \\
 ||                                      Started Jul 11, 2016                                      ||
-||                                 Last update: May 3rd, 2017                                     ||
+||                                 Last update: July 17th, 2017                                   ||
 \\         Currently supports Arch, Red-Hat, Fedora, and Solus and those based on them.          //
  \\                                                                                             //
   \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\///////////////////////////////////////////////"""
@@ -16,6 +16,8 @@ def main():
     if len(sys.argv) > 1:
         if sys.argv[1] == "-s":
             show_sys_info("n")
+        elif sys.argv[1] == "-h":
+            show_help()
     user = subprocess.getoutput("whoami")
     print("Welcome {0}".format(user))
     last_update = get_last_update(user)
@@ -105,7 +107,7 @@ def update(user_name):
         elif system == 'fedora':
             while(repeatVar):
                 try:
-                    subprocess.check_call(['su','-c', 'dnf upgrade'])
+                    subprocess.check_call(['su','-c', 'dnf upgrade -y'])
                     save_update(user_name)
                     repeatVar = False
                 except subprocess.CalledProcessError:
@@ -171,6 +173,8 @@ def show_sys_info(yn):
     kernel = subprocess.getoutput("uname -r")
     hostname = subprocess.getoutput("uname -n")
     kernelType = subprocess.getoutput("uname -s")
+    ipAddr = subprocess.getoutput("hostname -I")
+    
 
 
     mem_free_proc = subprocess.getoutput("free -h")
@@ -181,9 +185,9 @@ def show_sys_info(yn):
     cached_mem = temp[11]
 
     
-    print_seperator()
-    print(("INFO FOR {0}".format(hostname)).center(80," "))
-    print_seperator()
+    print_seperator("=")
+    print(("{0} STATUS".format(hostname)).center(80," "))
+    print_seperator("=")
 
     print("SYS INFO:".center(80))
     print_info("CPU:", cpu_name)
@@ -191,15 +195,16 @@ def show_sys_info(yn):
     print_info("ARCHITECTURE:", arch)
     print_info("KERNEL TYPE:", kernelType)
     print_info("KERNEL:", kernel)
+    print_info("IP:", ipAddr)
     #print("") # a simple line
-    print_seperator()
+    print_seperator("-")
 
     print("MEMORY USAGE:".center(80))
     print_info("TOTAL MEMORY:", total_mem)
     print_info("USED MEMORY:", used_mem)
     print_info("CACHED MEMORY:", cached_mem)
     print_info("FREE MEMORY:", free_mem)
-    print_seperator()
+    print_seperator("-")
 
     show_gui_info()
     sys.exit()
@@ -220,7 +225,7 @@ def show_gui_info():
     print_info("DISTRIBUTION:", distro)
     print_info("SESSION:", option)
     print_info("DESKTOP ENVIRONMENT:", desktop_environment)
-    print_seperator()
+    print_seperator("-")
     return
 #^----------------------------------------------------------------------------- show_gui_info()
 
@@ -232,11 +237,20 @@ def print_info(str_name, result):
     return
 #^----------------------------------------------------------------------------- print_info(str_name, result)
 
-def print_seperator():
+def print_seperator(insertChar):
     """Simply prints a separator on screen with periods. 80 chars long."""
-    print(".".center(80, '.'))
+    print(insertChar.center(80, insertChar))
     return
 #^----------------------------------------------------------------------------- print_separator()
+
+def show_help():
+    """Function to print a simple help message and exit."""
+    print("{0} : A simple tool to update a Linux Distribution.".format(sys.argv[0]))
+    print("    Options:")
+    print("    -s\n        Skip update process and show system information.")
+    print("    -h\n        Show this message and exit.")
+    sys.exit()
+#^----------------------------------------------------------------------------- show_help()
 
 #Standard broiler plate to run as main
 if __name__ == '__main__':
