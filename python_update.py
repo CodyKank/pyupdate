@@ -136,7 +136,7 @@ def get_system_type():
                       'solus': 'solus'}
     default = 'Unknown'
     system = distro_choices.get(system_id, default)
-    print(system)
+    #print(system)
     if system == default:
         system_id = subprocess.getoutput("cat /etc/os-release | grep 'ID_LIKE='").split('=')[1]
         system = system_id.replace('"', '')
