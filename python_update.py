@@ -4,12 +4,12 @@
   //                              Python 3 Linux System Update Script                           \\
  //                                         Cody Kankel                                          \\
 ||                                      Started Jul 11, 2016                                      ||
-||                                 Last update: July 17th, 2017                                   ||
+||                                 Last update: Jan 20th, 2018                                    ||
 \\         Currently supports Arch, Red-Hat, Fedora, and Solus and those based on them.          //
- \\                                                                                             //
+ \\                         Testing with Slackware and those based on it.                       //
   \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\///////////////////////////////////////////////"""
 
-import subprocess, sys
+import subprocess, sys, os.path, os
 
 def main():
     """Gathering user and desktop session, asks user for desire to update."""
@@ -113,6 +113,16 @@ def update(user_name):
                 except subprocess.CalledProcessError:
                     print("Incorrect Password.")
                     repeatVar = True
+
+        elif system == 'slackware':
+            # Checking if root, for now.
+            if os.getuid() != 0:
+                print('You must be root to run this script.')
+                sys.exit()
+            subprocess.check_call(['slackpkg', 'update'])
+            subprocess.check_call(['slackpkg', 'install-new'])
+            subprocess.check_call(['slackpkg', 'upgrade-all'])
+            #subprocess.check_call(['slackpkg', 'clean-system'])
     else:
         print("\nSystem is not recognized currently. If you feel as if this is an error,\n"\
                 + "please report it as an issue on Github.\n")
@@ -122,10 +132,10 @@ def update(user_name):
 def get_system_type():
     """Method to discover what distro the system is, i.e. if system is Debian, Red Hat, Arch
     etc. Will look for the ID in /etc/os-release. This means it will discover Antergos, Manjaro
-    and others as Arch, and Xubuntu, Ubuntu, and others as Debian, and Scientific, CentOs, Fedora
-    and others  as Red Hat. Method returns the base system as a string."""
+    and others as Arch, and Xubuntu, Ubuntu, and others as Debian, and Scientific, CentOs
+    and others as Red Hat. Method returns the base system as a string."""
 
-    system_id = (subprocess.getoutput("cat /etc/os-release | grep 'ID='")).split('\n')[0]
+    system_id = (subprocess.getoutput("grep -m 1 'ID=' /etc/os-release")).split('\n')[0]
     system_id = system_id.replace('"','') # Some systems produce (")'s  others do not!
     system_id = system_id[system_id.find('=') + 1:]
 
@@ -133,13 +143,14 @@ def get_system_type():
     distro_choices = {'fedora': 'fedora', 'centos': 'rhel', 'scientific': 'rhel', 'rhel': 'rhel', \
                       'debian': 'debian', 'ubuntu': 'debian', 'xubuntu': 'debian', 'galliumos': 'debian', \
                       'elementary': 'debian', 'arch': 'arch', 'antergos': 'arch', 'manjaro': 'arch', \
-                      'solus': 'solus'}
+                      'solus': 'solus', 'slackware': 'slackware'}
     default = 'Unknown'
     system = distro_choices.get(system_id, default)
-    #print(system)
     if system == default:
-        system_id = subprocess.getoutput("cat /etc/os-release | grep 'ID_LIKE='").split('=')[1]
+        system_id = subprocess.getoutput("grep -m 1 'ID_LIKE=' /etc/os-release").split('=')[1]
         system = system_id.replace('"', '')
+        if system == '':
+            system = default # Not found
     return system
 #^----------------------------------------------------------------------------- find_system_type()
 
@@ -174,8 +185,6 @@ def show_sys_info(yn):
     hostname = subprocess.getoutput("uname -n")
     kernelType = subprocess.getoutput("uname -s")
     ipAddr = subprocess.getoutput("hostname -I")
-    
-
 
     mem_free_proc = subprocess.getoutput("free -h")
     temp = mem_free_proc.split()
@@ -183,7 +192,6 @@ def show_sys_info(yn):
     used_mem = temp[8]
     free_mem = temp[9]
     cached_mem = temp[11]
-
     
     print_seperator("=")
     print(("{0} STATUS".format(hostname)).center(80," "))
@@ -195,8 +203,8 @@ def show_sys_info(yn):
     print_info("ARCHITECTURE:", arch)
     print_info("KERNEL TYPE:", kernelType)
     print_info("KERNEL:", kernel)
-    print_info("IP:", ipAddr)
-    #print("") # a simple line
+    if len(ipAddr) <= 14:
+        print_info("IP:", ipAddr)
     print_seperator("-")
 
     print("MEMORY USAGE:".center(80))
@@ -211,20 +219,24 @@ def show_sys_info(yn):
 #^----------------------------------------------------------------------------- show_sys_info(yn)
 
 def show_gui_info():
-    """Will find and print desktop info"""
+    """Will find and print desktop/wm info"""
     desktop_environment = subprocess.getoutput("echo $XDG_CURRENT_DESKTOP")
     option = subprocess.getoutput("echo $GDMSESSION")
-    distro = subprocess.getoutput("cat /etc/os-release | grep 'PRETTY'")
+    distro = subprocess.getoutput("grep 'PRETTY' /etc/os-release")
     distro = distro.split('=')[1].replace('"', '') # Grabbing just the pretty-name
     if desktop_environment == "":
-        desktop_environment = "Headless"
+        if (os.path.isfile('/usr/bin/wmctrl')==True or (os.path.isfile('/bin/wmctrl'))==True):
+            wm = subprocess.getoutput('wmctrl -m').split()[1]
     if option == "":
-        option = "A shell"
+        option = "NA"
 
     print("DESKTOP INFO:".center(80))
     print_info("DISTRIBUTION:", distro)
-    print_info("SESSION:", option)
-    print_info("DESKTOP ENVIRONMENT:", desktop_environment)
+    if desktop_environment == '':
+        print_info('WM:', wm)
+    else:
+        print_info("SESSION:", option)
+        print_info("DESKTOP ENVIRONMENT:", desktop_environment)
     print_seperator("-")
     return
 #^----------------------------------------------------------------------------- show_gui_info()

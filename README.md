@@ -10,7 +10,7 @@ Thus, this script will search in itself for the detected distribution and find w
 based off of and use that package manager to update the system. The supported distros are as
 follows:
 
-#### Supported Derived distributions
+#### Tested Derived distributions
 | Distro          | Derived From     |
 | --------------- | ---------------- |
 | Ubuntu          | Debian           |
@@ -23,7 +23,7 @@ follows:
 | Scientific      | RHEL             |
 | Korora          | Fedora           |
 
-#### Supported Independent/Parent distributions
+#### Tested Independent/Parent distributions
 | Distro          | Supported        |
 | --------------- | ---------------- |
 | RHEL            | Yes              |
@@ -31,6 +31,7 @@ follows:
 | Debian          | Yes              |
 | Solus           | Yes              |
 | Fedora          | Yes              |
+| Slackware       | Testing          |
 
 #### Options
 * The script can be run with the optional argument of -s to skip the update
@@ -39,6 +40,7 @@ follows:
 #### Requirements
 * Must have Python 3 installed
 * Must have one of the above distributions of Linux.
+* To use with a window manager, must have wmctrl installed.
 
 #### Future Goals
 * Provide better information post-update
