@@ -60,8 +60,7 @@ def update(user_name):
         if system == 'arch':
             while(repeatVar):
                 try:
-                    pacman = subprocess.Popen(['sudo', 'pacman', '-Syyu'])
-                    pacman.wait()
+                    pacman = subprocess.check_call(['su','-c', '/usr/bin/pacman -Syyu'])
                     save_update(user_name)
                     repeatVar = False
                 except subprocess.CalledProcessError:
