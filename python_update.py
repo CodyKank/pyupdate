@@ -35,7 +35,7 @@ def get_last_update(user_name):
     If the file is not found, assuming this is the first time running the script.
     The file will then be created if 'y' is chosen (executing the update)."""
     # Update-file will contain the date/time of the last update. It is hidden hence the prefix '.'
-    update_file = ("/home/" + user_name + "/.previous-update.txt")
+    update_file = (os.environ["HOME"] + "/.previous-update.txt")
     try:
         file_ob = open(update_file, 'r')
         last_update = file_ob.readline()
@@ -155,7 +155,7 @@ def get_system_type():
 
 def save_update(user_name):
     """If Y is chosen for update, the time and date will be saved to a file, able to be viewed again"""
-    update_file = ("/home/" + user_name + "/.previous-update.txt")
+    update_file = (os.environ["HOME"] + "/.previous-update.txt")
     file_ob = open(update_file, 'w')
     date = subprocess.getoutput('date')
     file_ob.write(str(date))
