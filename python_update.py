@@ -4,7 +4,7 @@
   //                              Python 3 Linux System Update Script                           \\
  //                                         Cody Kankel                                          \\
 ||                                      Started Jul 11, 2016                                      ||
-||                                 Last update: Jan 20th, 2018                                    ||
+||                                 Last update: Feb 28th, 2020                                    ||
 \\         Currently supports Arch, Red-Hat, Fedora, and Solus and those based on them.          //
  \\                         Testing with Slackware and those based on it.                       //
   \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\///////////////////////////////////////////////"""
@@ -150,6 +150,24 @@ def update(user_name):
             subprocess.check_call(['slackpkg', 'install-new'])
             subprocess.check_call(['slackpkg', 'upgrade-all'])
             #subprocess.check_call(['slackpkg', 'clean-system'])
+        elif system == 'void':
+            if user_name == "root":
+                update_xbps = subprocess.Popen((['xbps-install','-u','xbps']))
+                update_xbps.wait()
+                update = subprocess.Popen((['xbps-install','-Su']))
+                update.wait()
+            else:
+                try:
+                    update_xbps = subprocess.Popen((['sudo','xbps-install','-u','xbps']))
+                    update_xbps.wait()
+                    update = subprocess.Popen((['sudo','xbps-install','-Su']))
+                    update.wait()
+                except subprocess.CalledProcessError:
+                    print("Incorrect Password.")
+                    repeatVar = True
+
+                save_update(user_name)
+
     else:
         print("\nSystem is not recognized currently. If you feel as if this is an error,\n"\
                 + "please report it as an issue on Github.\n")
@@ -170,7 +188,7 @@ def get_system_type():
     distro_choices = {'fedora': 'fedora', 'centos': 'rhel', 'scientific': 'rhel', 'rhel': 'rhel', \
                       'debian': 'debian', 'ubuntu': 'debian', 'xubuntu': 'debian', 'galliumos': 'debian', \
                       'elementary': 'debian', 'arch': 'arch', 'antergos': 'arch', 'manjaro': 'arch', \
-                      'solus': 'solus', 'slackware': 'slackware'}
+                      'solus': 'solus', 'slackware': 'slackware', 'void':'void'}
     default = 'Unknown'
     system = distro_choices.get(system_id, default)
     if system == default:
