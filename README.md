@@ -17,7 +17,6 @@ follows:
 | Xubuntu         | Debian           |
 | GalliumOs       | Debian           |
 | Elementary      | Debian           |
-| Antergos        | Arch             |
 | Manjaro         | Arch             |
 | CentOs          | RHEL             |
 | Scientific      | RHEL             |
@@ -31,7 +30,7 @@ follows:
 | Debian          | Yes              |
 | Solus           | Yes              |
 | Fedora          | Yes              |
-| Slackware       | Testing          |
+| Slackware       | Possibly         |
 
 #### Options
 * The script can be run with the optional argument of -s to skip the update
@@ -43,5 +42,4 @@ follows:
 * To use with a window manager, must have wmctrl installed.
 
 #### Future Goals
-* Provide better information post-update
 * Option to show available updates
