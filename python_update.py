@@ -60,7 +60,11 @@ def update(user_name):
         if system == 'arch':
             while(repeatVar):
                 try:
-                    pacman = subprocess.check_call(['su','-c', '/usr/bin/pacman -Syyu'])
+                    if user_name == "root":
+                        pacman = subprocess.check_call(['/usr/bin/pacman', '-Syyu'])
+                    else:
+                        pacman = subprocess.check_call(['su','-c', '/usr/bin/pacman -Syyu'])
+
                     save_update(user_name)
                     repeatVar = False
                 except subprocess.CalledProcessError:
@@ -70,13 +74,23 @@ def update(user_name):
         elif system == 'debian':
             while(repeatVar):
                 try:
-                    apt_update = subprocess.Popen(['sudo', 'apt-get', '-y', 'update'])
-                    apt_update.communicate() #making the script wait
-                    apt_update.wait()
-                    apt_upgrade = subprocess.Popen(['sudo', 'apt-get', '-y', 'dist-upgrade'])
-                    apt_upgrade.wait()
-                    apt_remove = subprocess.Popen(['sudo', 'apt-get', '-y', 'autoremove'])
-                    apt_remove.wait()
+                    if user_name == "root":
+                        apt_update = subprocess.Popen(['apt-get', '-y', 'update'])
+                        apt_update.communicate() #making the script wait
+                        apt_update.wait()
+                        apt_upgrade = subprocess.Popen(['apt-get', '-y', 'dist-upgrade'])
+                        apt_upgrade.wait()
+                        apt_remove = subprocess.Popen(['apt-get', '-y', 'autoremove'])
+                        apt_remove.wait()
+                    else:
+                        apt_update = subprocess.Popen(['sudo', 'apt-get', '-y', 'update'])
+                        apt_update.communicate() #making the script wait
+                        apt_update.wait()
+                        apt_upgrade = subprocess.Popen(['sudo', 'apt-get', '-y', 'dist-upgrade'])
+                        apt_upgrade.wait()
+                        apt_remove = subprocess.Popen(['sudo', 'apt-get', '-y', 'autoremove'])
+                        apt_remove.wait()
+
                     save_update(user_name)
                     repeatVar = False
                 except subprocess.CalledProcessError:
@@ -86,8 +100,13 @@ def update(user_name):
         elif system == 'rhel':
             while(repeatVar):
                 try:
-                    yum = subprocess.Popen(['su', '-c', 'yum', '-y', 'update'])
-                    yum.wait()
+                    if user_name == "root":
+                        yum = subprocess.Popen(['yum', '-y', 'update'])
+                        yum.wait()
+                    else:
+                        yum = subprocess.Popen(['su', '-c', 'yum', '-y', 'update'])
+                        yum.wait()
+
                     save_update(user_name)
                 except subprocess.CalledProcessError:
                     print("Incorrect Password.")
@@ -96,8 +115,13 @@ def update(user_name):
         elif system == 'solus':
             while(repeatVar):
                 try:
-                    update = subprocess.Popen((['sudo', '-S', 'eopkg', '-y', 'up']))
-                    update.wait()
+                    if user_name == "root":
+                        update = subprocess.Popen((['eopkg', '-y', 'up']))
+                        update.wait()
+                    else:
+                        update = subprocess.Popen((['sudo', '-S', 'eopkg', '-y', 'up']))
+                        update.wait()
+
                     save_update(user_name)
                 except subprocess.CalledProcessError:
                     print("Incorrect Password.")
@@ -106,7 +130,11 @@ def update(user_name):
         elif system == 'fedora':
             while(repeatVar):
                 try:
-                    subprocess.check_call(['su','-c', 'dnf upgrade -y'])
+                    if user_name == "root":
+                        subprocess.check_call(['dnf upgrade -y'])
+                    else:
+                        subprocess.check_call(['su','-c', 'dnf upgrade -y'])
+
                     save_update(user_name)
                     repeatVar = False
                 except subprocess.CalledProcessError:
@@ -226,6 +254,8 @@ def show_gui_info():
     if desktop_environment == "":
         if (os.path.isfile('/usr/bin/wmctrl')==True or (os.path.isfile('/bin/wmctrl'))==True):
             wm = subprocess.getoutput('wmctrl -m').split()[1]
+        else:
+            wm = "?"
     if option == "":
         option = "NA"
 
