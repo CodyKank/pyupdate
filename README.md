@@ -25,6 +25,7 @@ follows:
 #### Tested Independent/Parent distributions
 | Distro          | Supported        |
 | --------------- | ---------------- |
+| Void            | Yes              |
 | RHEL            | Yes              |
 | Arch            | Yes              |
 | Debian          | Yes              |
